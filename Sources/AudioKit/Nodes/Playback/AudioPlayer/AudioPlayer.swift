@@ -179,7 +179,7 @@ public class AudioPlayer: Node {
 
     // MARK: - Internal functions
 
-    func internalCompletionHandler() {
+    @MainActor func internalCompletionHandler() {
         guard status == .playing,
                 engine?.isInManualRenderingMode == false else { return }
 

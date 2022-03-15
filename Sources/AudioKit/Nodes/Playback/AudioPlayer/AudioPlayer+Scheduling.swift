@@ -14,12 +14,16 @@ extension AudioPlayer {
 
         if isBuffered {
             updateBuffer()
-            scheduleBuffer(at: when,
-                           completionCallbackType: completionCallbackType)
+            Task {
+                await scheduleBuffer(at: when,
+                                     completionCallbackType: completionCallbackType)
+            }
 
         } else if file != nil {
-            scheduleSegment(at: when,
-                            completionCallbackType: completionCallbackType)
+            Task {
+                await scheduleSegment(at: when,
+                                      completionCallbackType: completionCallbackType)
+            }
 
         } else {
             Log("The player needs a file or a valid buffer to schedule", type: .error)
@@ -28,7 +32,7 @@ extension AudioPlayer {
 
     // play from disk rather than ram
     private func scheduleSegment(at audioTime: AVAudioTime?,
-                                 completionCallbackType: AVAudioPlayerNodeCompletionCallbackType = .dataPlayedBack) {
+                                 completionCallbackType: AVAudioPlayerNodeCompletionCallbackType = .dataPlayedBack) async {
         guard let file = file else {
             Log("File is nil")
             return
@@ -50,22 +54,19 @@ extension AudioPlayer {
 
         let frameCount = AVAudioFrameCount(totalFrames)
 
-        playerNode.scheduleSegment(file,
+        await playerNode.scheduleSegment(file,
                                    startingFrame: startFrame,
                                    frameCount: frameCount,
-                                   at: audioTime,
-                                   completionCallbackType: completionCallbackType) { callbackType in
-            if self.isSeeking { return }
-            DispatchQueue.main.async {
-                self.internalCompletionHandler()
-            }
-        }
+                                   at: audioTime)
+
+        if isSeeking { return }
+        await internalCompletionHandler()
 
         playerNode.prepare(withFrameCount: frameCount)
     }
 
     private func scheduleBuffer(at audioTime: AVAudioTime?,
-                                completionCallbackType: AVAudioPlayerNodeCompletionCallbackType = .dataPlayedBack) {
+                                completionCallbackType: AVAudioPlayerNodeCompletionCallbackType = .dataPlayedBack) async {
         if playerNode.outputFormat(forBus: 0) != buffer?.format {
             Log("Format of the buffer doesn't match the player")
             Log("Player", playerNode.outputFormat(forBus: 0), "Buffer", buffer?.format)
@@ -83,15 +84,12 @@ extension AudioPlayer {
             bufferOptions = [.loops, .interrupts]
         }
 
-        playerNode.scheduleBuffer(buffer,
+        await playerNode.scheduleBuffer(buffer,
                                   at: audioTime,
-                                  options: bufferOptions,
-                                  completionCallbackType: completionCallbackType) { callbackType in
-            if self.isSeeking { return }
-            DispatchQueue.main.async {
-                self.internalCompletionHandler()
-            }
-        }
+                                  options: bufferOptions)
+
+        if isSeeking { return }
+        await internalCompletionHandler()
 
         playerNode.prepare(withFrameCount: buffer.frameLength)
     }
