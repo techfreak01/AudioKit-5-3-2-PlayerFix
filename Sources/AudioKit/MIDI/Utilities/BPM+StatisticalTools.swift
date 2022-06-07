@@ -2,6 +2,7 @@
 
 #if !os(tvOS)
 import Foundation
+public typealias BPMType = TimeInterval
 
 extension Double {
     /// Tool for rounding to decimal places which is good for
