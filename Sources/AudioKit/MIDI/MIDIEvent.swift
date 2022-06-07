@@ -141,19 +141,6 @@ public struct MIDIEvent: MIDIMessage, Equatable {
         }
     }
     
-    init?(fileEvent event: MIDIFileChunkEvent) {
-        guard
-            event.computedData.isNotEmpty,
-            event.computedData[0] != 0xFF //would be a meta event, not realtime system reset message
-        else {
-            return nil
-        }
-        self = MIDIEvent(data: event.computedData)
-        if event.timeFormat == .ticksPerBeat {
-            positionInBeats = event.position
-        }
-    }
-    
     /// Initialize the MIDI Event from a raw MIDIByte packet (ie. from Bluetooth)
     ///
     /// - Parameters:

@@ -132,20 +132,6 @@ public struct MIDICustomMetaEvent: MIDIMessage {
         }
     }
 
-    /// Initialize ith MIDI File Chunk Event
-    /// - Parameter event: MIDI File Chunk Event
-    init?(fileEvent event: MIDIFileChunkEvent) {
-        guard
-            let metaEvent = MIDICustomMetaEvent(data: event.computedData)
-        else {
-            return nil
-        }
-        self = metaEvent
-        if event.timeFormat == .ticksPerBeat {
-            positionInBeats = event.position
-        }
-    }
-
     /// Event data
     public let data: [MIDIByte]
     /// Event type
