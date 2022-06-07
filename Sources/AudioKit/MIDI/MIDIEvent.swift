@@ -27,9 +27,6 @@ public struct MIDIEvent: MIDIMessage, Equatable {
         if let command = self.command {
             return "\(command.description) - \(data)"
         }
-        if let meta = MIDICustomMetaEvent(data: data) {
-            return "\(meta.description) - \(data)"
-        }
         return "Unhandled event \(data)"
     }
     
@@ -167,9 +164,7 @@ public struct MIDIEvent: MIDIMessage, Equatable {
             // is regular MIDI status
             let channel = data[0].lowBit
             fillData(status: status, channel: channel, bytes: Array(data.dropFirst()))
-        } else if data.isNotEmpty, let metaType = MIDICustomMetaEventType(rawValue: data[0]) {
-            Log("is meta event \(metaType.description)", log: OSLog.midi)
-        }
+        } 
     }
     
     /// Initialize the MIDI Event from a status message
