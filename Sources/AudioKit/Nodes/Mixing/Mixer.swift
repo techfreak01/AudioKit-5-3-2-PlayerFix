@@ -29,7 +29,7 @@ public class Mixer: Node, NamedNode {
     /// Output Pan (-1 to 1, Default 0 = center)
     public var pan: AUValue = 0 {
         didSet {
-            pan = pan.clamped(to: -1...1)
+            pan = pan.clamped(to: -1 ... 1)
             mixerAU.pan = pan
         }
     }
@@ -97,10 +97,10 @@ public class Mixer: Node, NamedNode {
     /// If this is last input's connection,
     /// input will be detached from the engine.
     /// - Parameter node: Node to remove
-    public func removeInput(_ node: Node) {
+    public func removeInput(_ node: Node, strategy: DisconnectStrategy = .recursive) {
         guard inputs.contains(where: { $0 === node }) else { return }
         inputs.removeAll(where: { $0 === node })
-        disconnectAndDetachIfLast(input: node)
+        disconnect(input: node, strategy: strategy)
     }
 
     /// Remove all inputs from the mixer
