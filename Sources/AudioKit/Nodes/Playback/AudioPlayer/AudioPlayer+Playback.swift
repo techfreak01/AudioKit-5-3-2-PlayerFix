@@ -107,6 +107,10 @@ extension AudioPlayer {
 
     /// Stop audio player. This won't generate a callback event
     public func stop() {
+        if (status == .paused) {
+            playerNode.stop()
+            status = .stopped
+        }
         guard status == .playing else { return }
         pausedTime = getCurrentTime()
         playerNode.stop()
